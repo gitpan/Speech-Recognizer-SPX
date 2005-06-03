@@ -1,13 +1,13 @@
 Speech::Recognizer::SPX - Perl bindings for Sphinx-II
 -----------------------------------------------------
-David Huggins-Daines <dhd@cepstral.com>, Cepstral LLC
-http://www.cepstral.com/
-March 31st, 2001
+David Huggins-Daines <dhuggins@cs.cmu.edu>
+http://www.cs.cmu.edu/~dhuggins
+June 3, 2005
 
 Installation
 ------------
 
-This module requires Sphinx2 0.3 or later, available from
+This module requires Sphinx2 0.5 or later, available from
 http://www.sourceforge.net/projects/cmusphinx/.  To build and install
 Sphinx-II, unpack the sphinx2 tarball, change into the directory
 created and run:

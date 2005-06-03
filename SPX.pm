@@ -7,7 +7,7 @@ use strict;
 # This module is free software; you can redistribute it and/or modify
 # it under the same terms as Perl itself.
 #
-# Written by David Huggins-Daines <dhd@cepstral.com>
+# Written by David Huggins-Daines <dhuggins@cs.cmu.edu>
 
 package Speech::Recognizer::SPX;
 use Carp;
@@ -93,7 +93,7 @@ require Speech::Recognizer::SPX::Config;
 		      ],
 	       );
 
-$VERSION = 0.06_02;
+$VERSION = 0.07;
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -305,7 +305,7 @@ For now there are just some example programs in the distribution.
 
 =head1 AUTHOR
 
-David Huggins-Daines <dhd@cepstral.com>
+David Huggins-Daines <dhuggins@cs.cmu.edu>
 
 =head1 SEE ALSO
 

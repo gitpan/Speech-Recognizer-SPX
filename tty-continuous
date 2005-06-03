@@ -8,11 +8,11 @@
 # This program is free software; you can redistribute it and/or modify
 # it under the same terms as Perl itself.
 #
-# Written by David Huggins-Daines <dhd@cepstral.com>
+# Written by David Huggins-Daines <dhuggins@cs.cmu.edu>
 
 use strict;
 use Speech::Recognizer::SPX qw(:fbs :uttproc);
-use Audio::SPX;
+use Audio::SPX qw(DEFAULT_SAMPLES_PER_SEC);
 use Time::HiRes qw(usleep);
 
 use constant SAMPLE_RATE => 16000;

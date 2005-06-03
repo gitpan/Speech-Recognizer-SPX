@@ -7,7 +7,7 @@
  * This module is free software; you can redistribute it and/or modify
  * it under the same terms as Perl itself.
  *
- * Written by David Huggins-Daines <dhd@cepstral.com>
+ * Written by David Huggins-Daines <dhuggins@cs.cmu.edu>
  */
 
 #include "EXTERN.h"
@@ -393,7 +393,7 @@ cont_ad_set_thresh(cont, sil, sp)
 	int32		sp
 
 SYSRET
-cont_ad_set_params(cont, delta_sil, delta_speech, min_noise, max_noise, winsize, speech_onset, sil_onset, leader, trailer)
+cont_ad_set_params(cont, delta_sil, delta_speech, min_noise, max_noise, winsize, speech_onset, sil_onset, leader, trailer, adapt_rate=0.2)
 	cont_ad_t *	cont
 	int32		delta_sil
 	int32		delta_speech
@@ -404,6 +404,7 @@ cont_ad_set_params(cont, delta_sil, delta_speech, min_noise, max_noise, winsize,
 	int32		sil_onset
 	int32		leader
 	int32		trailer
+	float32		adapt_rate
 
 void
 cont_ad_get_params(cont)
@@ -411,11 +412,12 @@ cont_ad_get_params(cont)
 	PREINIT:
 		int32	res, delta_sil, delta_speech, min_noise, max_noise,
 			winsize, speech_onset, sil_onset, leader, trailer;
+		float32 adapt_rate;
 	PPCODE:
 		res = cont_ad_get_params(cont, &delta_sil, &delta_speech,
 					 &min_noise, &max_noise,
 					 &winsize, &speech_onset,
-					 &sil_onset, &leader, &trailer);
+					 &sil_onset, &leader, &trailer, &adapt_rate);
 		if (res == -1)
 			return; /* empty list */
 		EXTEND(SP, 9);
@@ -428,6 +430,7 @@ cont_ad_get_params(cont)
 		PUSHs(sv_2mortal(newSViv(sil_onset)));
 		PUSHs(sv_2mortal(newSViv(leader)));
 		PUSHs(sv_2mortal(newSViv(trailer)));
+		PUSHs(sv_2mortal(newSVnv(adapt_rate)));
 
 SYSRET
 cont_ad_reset(cont)
@@ -467,5 +470,6 @@ cont_ad_read_ts(c)
 		RETVAL
 
 void
-cont_ad_set_logfp(fp)
+cont_ad_set_logfp(c, fp)
+	cont_ad_t *	c
 	FILE *		fp

@@ -1,3 +1,4 @@
+float32			T_NV
 int32			T_IV
 int16 *			T_PV
 float **		T_PV

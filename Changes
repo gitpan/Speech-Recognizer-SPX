@@ -1,5 +1,11 @@
 Revision history for Perl extension Speech::Recognizer::SPX
 
+0.07 Fri Jun  3 12:23:46 EDT 2005
+	- Long-overdue update
+	- Restores compatibility with Sphinx2 0.5
+	- Makes it possible to use a non-standard --sphinx-prefix
+	- New contact addresses, etc.
+
 0.06_02 Tue Mar 27 12:17:45 EST 2001
 	- First externally released version.
 	- No code changes from 0.06_01, just different copyright

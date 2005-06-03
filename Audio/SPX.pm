@@ -7,7 +7,7 @@ use strict;
 # This module is free software; you can redistribute it and/or modify
 # it under the same terms as Perl itself.
 #
-# Written by David Huggins-Daines <dhd@cepstral.com>
+# Written by David Huggins-Daines <dhuggins@cs.cmu.edu>
 
 package Audio::SPX;
 use Carp;
@@ -120,7 +120,7 @@ of this stuff does either :-)
 
 =head1 AUTHOR
 
-David Huggins-Daines <dhd@cepstral.com>
+David Huggins-Daines <dhuggins@cs.cmu.edu>
 
 =head1 SEE ALSO
 
