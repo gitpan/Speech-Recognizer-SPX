@@ -9,7 +9,7 @@ my @possible_prefixes;
 if (defined $SPX_PREFIX) {
     @possible_prefixes = ($SPX_PREFIX);
 } else {
-    @possible_prefixes = qw(
+    @possible_prefixes = $ENV{HOME}, qw(
 			    /usr
 			    /usr/local
 			    /usr0

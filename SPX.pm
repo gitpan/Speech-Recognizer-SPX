@@ -93,7 +93,7 @@ require Speech::Recognizer::SPX::Config;
 		      ],
 	       );
 
-$VERSION = 0.07;
+$VERSION = 0.07_01;
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()

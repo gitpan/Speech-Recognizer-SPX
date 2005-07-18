@@ -405,6 +405,18 @@ cont_ad_set_params(cont, delta_sil, delta_speech, min_noise, max_noise, winsize,
 	int32		leader
 	int32		trailer
 	float32		adapt_rate
+	CODE:
+#ifdef HAVE_ADAPT_RATE
+		RETVAL = cont_ad_set_params(cont, delta_sil, delta_speech,
+					min_noise, max_noise, winsize, speech_onset,
+					sil_onset, leader, trailer, adapt_rate);
+#else
+		RETVAL = cont_ad_set_params(cont, delta_sil, delta_speech,
+					min_noise, max_noise, winsize, speech_onset,
+					sil_onset, leader, trailer);
+#endif
+	OUTPUT:
+		RETVAL
 
 void
 cont_ad_get_params(cont)
@@ -414,10 +426,15 @@ cont_ad_get_params(cont)
 			winsize, speech_onset, sil_onset, leader, trailer;
 		float32 adapt_rate;
 	PPCODE:
+#ifdef HAVE_ADAPT_RATE
 		res = cont_ad_get_params(cont, &delta_sil, &delta_speech,
-					 &min_noise, &max_noise,
-					 &winsize, &speech_onset,
-					 &sil_onset, &leader, &trailer, &adapt_rate);
+					&min_noise, &max_noise, &winsize, &speech_onset,
+					&sil_onset, &leader, &trailer, &adapt_rate);
+#else
+		res = cont_ad_get_params(cont, &delta_sil, &delta_speech,
+					&min_noise, &max_noise, &winsize, &speech_onset,
+					&sil_onset, &leader, &trailer);
+#endif
 		if (res == -1)
 			return; /* empty list */
 		EXTEND(SP, 9);
@@ -473,3 +490,9 @@ void
 cont_ad_set_logfp(c, fp)
 	cont_ad_t *	c
 	FILE *		fp
+	CODE:
+#ifdef HAVE_C_LOGFP
+		cont_ad_set_logfp(c, fp);
+#else
+		cont_ad_set_logfp(fp);
+#endif
