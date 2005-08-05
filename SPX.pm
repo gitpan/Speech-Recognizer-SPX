@@ -31,7 +31,9 @@ require Speech::Recognizer::SPX::Config;
 		uttproc_stop_utt
 		uttproc_restart_utt
 		uttproc_result
+		uttproc_result_seg
 		uttproc_partial_result
+		uttproc_partial_result_seg
 		uttproc_get_uttid
 		uttproc_set_auto_uttid_prefix
 		uttproc_set_lm
@@ -40,6 +42,7 @@ require Speech::Recognizer::SPX::Config;
 		uttproc_set_rawlogdir
 		uttproc_set_mfclogdir
 		uttproc_set_logfile
+		search_get_alt
 
 		lm_read
 		lm_delete
@@ -74,7 +77,9 @@ require Speech::Recognizer::SPX::Config;
 			       uttproc_stop_utt
 			       uttproc_restart_utt
 			       uttproc_result
+			       uttproc_result_seg
 			       uttproc_partial_result
+			       uttproc_partial_result_seg
 			       uttproc_get_uttid
 			       uttproc_set_auto_uttid_prefix
 			       uttproc_set_lm
@@ -83,6 +88,7 @@ require Speech::Recognizer::SPX::Config;
 			       uttproc_set_rawlogdir
 			       uttproc_set_mfclogdir
 			       uttproc_set_logfile
+			       search_get_alt
 			      )
 			   ],
 		lm => [
@@ -93,7 +99,7 @@ require Speech::Recognizer::SPX::Config;
 		      ],
 	       );
 
-$VERSION = 0.07_01;
+$VERSION = 0.08;
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -122,6 +128,46 @@ sub AUTOLOAD {
 }
 
 bootstrap Speech::Recognizer::SPX $VERSION;
+
+package Speech::Recognizer::SPX::Hypothesis;
+
+# CAUTION: These constants must match the ordering in SPX.xs (new_hyp_sv)
+use constant SENT => 0;
+use constant UTTID => 1;
+use constant SENSCALE => 2; # Sphinx3 will use this
+use constant ASCR => 3;
+use constant LSCR => 4;
+use constant SEGS => 5;
+
+sub sent { $_[0][SENT] }
+sub uttid { $_[0][UTTID] }
+sub senscale { $_[0][SENSCALE] }
+sub ascr { $_[0][ASCR] }
+sub lscr { $_[0][LSCR] }
+sub segs { $_[0][SEGS] }
+
+package Speech::Recognizer::SPX::Segment;
+
+# CAUTION: These constants must match the ordering in SPX.xs (new_seg_sv)
+use constant WORD => 0;
+use constant SF => 1;
+use constant EF => 2;
+use constant ASCR => 3;
+use constant LSCR => 4;
+use constant FSG_STATE => 5;
+use constant CONF => 6;
+use constant LATDEN => 7;
+use constant PHONE_PERP => 8;
+
+sub word { $_[0][WORD] }
+sub sf { $_[0][SF] }
+sub ef { $_[0][EF] }
+sub ascr { $_[0][ASCR] }
+sub lscr { $_[0][LSCR] }
+sub fsg_state { $_[0][FSG_STATE] }
+sub conf { $_[0][CONF] }
+sub latden { $_[0][LATDEN] }
+sub phone_perp { $_[0][PHONE_PERP] }
 
 1;
 __END__
@@ -192,7 +238,9 @@ are:
   uttproc_stop_utt
   uttproc_restart_utt
   uttproc_result
+  uttproc_result_seg
   uttproc_partial_result
+  uttproc_partial_result_seg
   uttproc_get_uttid
   uttproc_set_auto_uttid_prefix
   uttproc_set_lm
@@ -201,6 +249,7 @@ are:
   uttproc_set_rawlogdir
   uttproc_set_mfclogdir
   uttproc_set_logfile
+  search_get_alt
 
 =item C<:lm>
 
@@ -282,6 +331,20 @@ have the desired effect.
 
   my ($frames, $hypothesis) = uttproc_result($block);
   my ($frames, $hypothesis) = uttproc_partial_result();
+  my ($frames, $hypseg) = uttproc_result_seg($block);
+  my ($frames, $hypseg) = uttproc_partial_result_seg();
+  my $hypothesis = $hypseg->sent;
+  my $segs = $hypseg->segs;
+  my @nbest = search_get_alt($n); # Must call uttproc_result first!
+  foreach my $nhyp (@nbest) {
+    my $nsent = $nhyp->sent;
+    my $nsegs = $nhyp->segs;
+    print "Hypothesis: $nsent\n";
+    foreach my $seg (@$nsegs) {
+      printf "  Start frame %d end frame %d word %s\n",
+             $seg->sf, $seg->ef, $seg->word;
+    }
+  }
 
 At any point during utterance processing, you may call
 C<uttproc_partial_result> to obtain the current "best guess".  Note
@@ -294,6 +357,52 @@ called C<uttproc_end_utt> (or C<uttproc_abort_utt> or also possibly
 C<uttproc_stop_utt>).  The C<$block> flag is also optional here, but I
 strongly suggest you use it.
 
+The functions C<uttproc_result_seg> and C<uttproc_partial_result_seg>
+functions work similarly except that instead of returning a string,
+they return a C<Speech::Recognizer::SPX::Hypothesis> object which
+contains probability and word segmentation information.  You can
+access its fields with the following accessor functions:
+
+  sent
+  senscale
+  ascr
+  lscr
+  segs
+
+The C<sent> field contains the string representation of the
+hypothesis, and is equivalent to the string returned by
+C<uttproc_result>.  The C<senscale>, C<ascr>, and C<lscr> fields are
+currently unimplemented.
+
+The C<segs> field contains a reference to an array of
+C<Speech::Recognizer::SPX::Segment> objects.  Each of these objects
+contains fields which can be accessed with the following accessors:
+
+  word
+  sf
+  ef
+  ascr
+  lscr
+  fsg_state
+  conf
+  latden
+  phone_perp
+
+The C<word> field contains the string representation of the word.  The
+C<sf> and C<ef> fields contain the start and end frames for this word.
+The C<ascr> and C<lscr> fields contain the acoustic and language model
+scores for the word.  The C<fsg_state> and C<conf> fields are
+unimplemented.  The C<latden> field contains the average lattice
+density for this word, while the C<phone_perp> contains the average
+phoneme perplexity.
+
+You can also obtain an N-best list of hypotheses using the
+C<search_get_alt> function.  This function returns a list of the
+number of hypotheses requested, or as many as can be found.  Each
+element in this list is a C<Speech::Recognizer::SPX::Hypothesis>
+object like the above, except that the acoustic/language model score
+is not filled in.
+
 =head1 FIDDLY BITS
 
 Changing language models, etc, etc...  This documentation is under
@@ -305,7 +414,9 @@ For now there are just some example programs in the distribution.
 
 =head1 AUTHOR
 
-David Huggins-Daines <dhuggins@cs.cmu.edu>
+David Huggins-Daines <dhuggins@cs.cmu.edu>.  Support for N-best
+hypotheses was funded by SingleTouch Interactive, Inc
+(http://www.singletouch.net/).
 
 =head1 SEE ALSO
 

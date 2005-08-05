@@ -1,8 +1,17 @@
 Revision history for Perl extension Speech::Recognizer::SPX
 
-0.07_01 Mon Jul 18 10:08:36 EDT 2005
-	- Bug-fix release.
-	- Actually restores compatibility with 0.5, and other versions.
+0.08 Fri Aug  5 16:35:37 EDT 2005
+	- Official release with N-best, segmentation.
+
+0.07_92 Mon Jul 18 10:30:18 EDT 2005
+	- Incorporate proper backwards-compatibility code.
+
+0.07_91 Tue Jul 12 12:31:51 EDT 2005
+     	- Fix compilation/test on platforms without audio
+	- Try to be backwards-compatible with Sphinx2 0.3 (untested)
+	- Add support for word segmentation in uttproc
+	- Add support for N-best lists, funded by SingleTouch
+          Interactive, Inc (http://www.singletouch.net/)
 
 0.07 Fri Jun  3 12:23:46 EDT 2005
 	- Long-overdue update

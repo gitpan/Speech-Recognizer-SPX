@@ -6,8 +6,11 @@ use Audio::SPX;
 $loaded = 1;
 print "ok 1\n";
 
-my $ad = Audio::SPX->open_sps(16000) # 8000 "not supported" (!)
-    or die "not ok 2\n";
+my $ad = Audio::SPX->open_sps(16000); # 8000 "not supported" (!)
+unless (defined($ad)) {
+    print "Audio not supported, skipping tests\n";
+    exit 0;
+}
 print "ok 2\n";
 
 $ad->start_rec

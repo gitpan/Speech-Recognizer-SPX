@@ -2,6 +2,9 @@ use ExtUtils::MakeMaker;
 use strict;
 use vars qw($SPX_PREFIX);
 
+# See lib/ExtUtils/MakeMaker.pm for details of how to influence
+# the contents of the Makefile that is written.
+
 # The audio interface has some nasty incompatibility problems between
 # <0.5, 0.5, and >0.5.  We will try to account for them here.
 my $defs;
@@ -31,6 +34,7 @@ if (open CONTAD, "<$SPX_PREFIX/include/sphinx2/cont_ad.h") {
 }
 else {
     warn "Failed to open $SPX_PREFIX/include/cont_ad.h, assuming most recent version.\n";
+    $defs = "-DHAVE_ADAPT_RATE -DHAVE_C_LOGFP";
 }
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence

@@ -189,6 +189,7 @@ not_there:
     return 0;
 }
 
+#ifdef AD_BACKEND_OSS
 int ad_nbfh_read(ad_rec_t *ad, int16 *buf, int32 max)
 {
 	int fd = ad->dspFD; /* Linux specific */
@@ -219,6 +220,7 @@ int ad_nbfh_read(ad_rec_t *ad, int16 *buf, int32 max)
 
 	return bytes / ad->bps;
 }
+#endif
 
 typedef int32 SYSRET;
 

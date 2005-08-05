@@ -66,6 +66,7 @@ close CONFIG;
 WriteMakefile(
 	      NAME	   => 'Speech::Recognizer::SPX',
 	      VERSION_FROM => 'SPX.pm',
+	      DIR          => [ 'FE', 'Audio' ],
 	      LIBS	   => ["-L$SPX_PREFIX/lib -lsphinx2 -lsphinx2ad -lsphinx2fe -lm"],
 	      INC          => "-I$SPX_PREFIX/include",
 	      OPTIMIZE     => '-g -O2',
