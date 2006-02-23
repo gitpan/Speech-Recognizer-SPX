@@ -348,7 +348,12 @@ fe_process_utt(fe, spch, nsamps)
 			New(666+i, cep[i], fe->NUM_CEPSTRA, float32);
 
 		/* Cross our fingers... */
+#ifdef POST_0_6_FE
+		if (fe_process_utt(fe, spch, nsamps, cep, &output_frames) < 0)
+			goto out; /* empty list */
+#else
 		output_frames = fe_process_utt(fe, spch, nsamps, cep);
+#endif
 		assert(output_frames <= frame_count);
 		if (output_frames <= 0)
 			goto out; /* empty list */
@@ -384,8 +389,12 @@ fe_end_utt(fe)
 	float32 *cepv;
 	CODE:
 		New(0xc0debabe, cepv, fe->NUM_CEPSTRA, float32);
-
+#ifdef POST_0_6_FE
+		if (fe_end_utt(fe, cepv, &output_frames) < 0)
+			output_frames = -1;
+#else
 		output_frames = fe_end_utt(fe, cepv);
+#endif
 
 		if (output_frames > 0) { /* 1 is the only possible value */
 			SV ** svs;

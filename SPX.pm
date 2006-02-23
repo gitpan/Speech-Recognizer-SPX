@@ -99,7 +99,7 @@ require Speech::Recognizer::SPX::Config;
 		      ],
 	       );
 
-$VERSION = 0.08;
+$VERSION = 0.08_01;
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -155,9 +155,11 @@ use constant EF => 2;
 use constant ASCR => 3;
 use constant LSCR => 4;
 use constant FSG_STATE => 5;
+use constant FSG_STATE_TO => 5;
 use constant CONF => 6;
 use constant LATDEN => 7;
 use constant PHONE_PERP => 8;
+use constant FSG_STATE_FROM => 9;
 
 sub word { $_[0][WORD] }
 sub sf { $_[0][SF] }
@@ -165,9 +167,11 @@ sub ef { $_[0][EF] }
 sub ascr { $_[0][ASCR] }
 sub lscr { $_[0][LSCR] }
 sub fsg_state { $_[0][FSG_STATE] }
+sub fsg_state_to { $_[0][FSG_STATE] }
 sub conf { $_[0][CONF] }
 sub latden { $_[0][LATDEN] }
 sub phone_perp { $_[0][PHONE_PERP] }
+sub fsg_state_from { $_[0][FSG_STATE_FROM] }
 
 1;
 __END__
@@ -383,18 +387,22 @@ contains fields which can be accessed with the following accessors:
   ef
   ascr
   lscr
-  fsg_state
   conf
   latden
   phone_perp
+  fsg_state_to
+  fsg_state_from
 
 The C<word> field contains the string representation of the word.  The
 C<sf> and C<ef> fields contain the start and end frames for this word.
 The C<ascr> and C<lscr> fields contain the acoustic and language model
-scores for the word.  The C<fsg_state> and C<conf> fields are
-unimplemented.  The C<latden> field contains the average lattice
-density for this word, while the C<phone_perp> contains the average
-phoneme perplexity.
+scores for the word.  The C<fsg_state_from> and C<fsg_state_to> fields
+indicate the finite-state grammar states in which this entry starts
+and terminates, if a finite-state grammar is used.  The C<latden>
+field contains the average lattice density for this word, while the
+C<phone_perp> contains the average phoneme perplexity.  The C<conf>
+field contains a confidence score which is an estimated probability
+that this word was recognized correctly.
 
 You can also obtain an N-best list of hypotheses using the
 C<search_get_alt> function.  This function returns a list of the

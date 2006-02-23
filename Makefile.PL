@@ -61,6 +61,21 @@ package Speech::Recognizer::SPX;
 EOF
 close CONFIG;
 
+
+my @defs;
+if (open FE_H, "<$SPX_PREFIX/include/sphinx2/fe.h") {
+    while (<FE_H>) {
+	if (/\*nframes/) {
+	    print "Detected post-0.6 hypothesis API\n";
+	    push @defs, '-DPOST_0_6_API';
+	    last;
+	}
+    }
+}
+else {
+    warn "Failed to open $SPX_PREFIX/include/sphinx2/fe.h, compilation may fail\n";
+}
+
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
@@ -70,6 +85,7 @@ WriteMakefile(
 	      LIBS	   => ["-L$SPX_PREFIX/lib -lsphinx2 -lsphinx2ad -lsphinx2fe -lm"],
 	      INC          => "-I$SPX_PREFIX/include",
 	      OPTIMIZE     => '-g -O2',
+	      DEFINE       => "@defs",
 	      # For Speech::Recognizer::SPX::Server
 	      PREREQ_PM    => { 'Time::HiRes' => 0 },
 	      clean        => { FILES => 'SPX/Config.pm' },

@@ -288,10 +288,17 @@ new_seg_sv(search_hyp_t *hyp)
 	av_push(seg_av, newSViv(hyp->ef));
 	av_push(seg_av, newSViv(hyp->ascr));
 	av_push(seg_av, newSViv(hyp->lscr));
+#ifdef POST_0_6_API
+	av_push(seg_av, newSViv(hyp->fsg_state_to));
+#else
 	av_push(seg_av, newSViv(hyp->fsg_state));
+#endif
 	av_push(seg_av, newSVnv(hyp->conf));
 	av_push(seg_av, newSViv(hyp->latden));
 	av_push(seg_av, newSVnv(hyp->phone_perp));
+#ifdef POST_0_6_API
+	av_push(seg_av, newSViv(hyp->fsg_state_from));
+#endif
 
 	return sv_bless(newRV_noinc((SV *)seg_av),
 			gv_stashpv("Speech::Recognizer::SPX::Segment", 1));
