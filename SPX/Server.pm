@@ -1,7 +1,7 @@
 # -*- cperl -*-
 use strict;
 
-# Speech::Recognizer::SPX::Server: Perl module for writing Sphinx-II
+# Speech::Recognizer::SPX::Server: Perl module for writing PocketSphinx
 # streaming audio servers.
 
 # Copyright (c) 2000 Cepstral LLC.
@@ -19,46 +19,12 @@ use Fcntl;
 use Errno;
 
 use vars qw($VERSION);
-$VERSION=0.02;
-
-my %defaults = (-live		=> 'TRUE',
-		-samp		=> 16000,
-		-adcin		=> 'TRUE',
-		-ctloffset	=> 0,
-		-ctlcount	=> 100000000,
-		-cepdir		=> "$SPHINXDIR/model/lm/turtle",
-		-datadir	=> "$SPHINXDIR/model/lm/turtle",
-		-agcmax		=> 'FALSE',
-		-langwt		=> 6.5,
-		-fwdflatlw	=> 8.5,
-		-rescorelw	=> 9.5,
-		-ugwt		=> 0.5,
-		-fillpen	=> 1e-10,
-		-silpen		=> 0.005,
-		-inspen		=> 0.65,
-		-top		=> 1,
-		-topsenfrm	=> 3,
-		-topsenthresh	=> -70000,
-		-beam		=> 2e-06,
-		-npbeam		=> 2e-06,
-		-lpbeam		=> 2e-05,
-		-lponlybeam	=> 0.0005,
-		-nwbeam		=> 0.0005,
-		-fwdflat	=> 'FALSE',
-		-fwdflatbeam	=> 1e-08,
-		-fwdflatnwbeam	=> 0.0003,
-		-bestpath	=> 'TRUE',
-		-kbdumpdir	=> $SPHINXDIR,
-		-lmfn		=> "$SPHINXDIR/model/lm/turtle/turtle.lm",
-		-dictfn		=> "$SPHINXDIR/model/lm/turtle/turtle.dic",
-		-phnfn		=> "$SPHINXDIR/model/hmm/6k/phone",
-		-mapfn		=> "$SPHINXDIR/model/hmm/6k/map",
-		-hmmdir		=> "$SPHINXDIR/model/hmm/6k",
-		-hmmdirlist	=> "$SPHINXDIR/model/hmm/6k",
-		-ndictfn	=> "$SPHINXDIR/model/hmm/6k/noisedict",
-		'-8bsen'	=> 'TRUE',
-		-sendumpfn	=> "$SPHINXDIR/model/hmm/6k/sendump",
-		-cbdir		=> "$SPHINXDIR/model/hmm/6k");
+$VERSION=0.03;
+my %defaults = ( -samprate	=> 16000,
+		 -adcin	=> 'TRUE',
+		 -lm		=> "$SPHINXDIR/model/lm/turtle/turtle.lm",
+		 -dict 	=> "$SPHINXDIR/model/lm/turtle/turtle.dic",
+		 -hmm  	=> "$SPHINXDIR/model/hmm/wsj1" );
 
 sub init {
     my ($this, $args, $sock, $log, $verbose) = @_;
@@ -72,8 +38,8 @@ sub init {
 	$SIG{__DIE__} = sub { print $log @_; exit $! || ($? >> 8) || 255 };
     }
 
-    print $log "initializing sphinx2\n" if $log;
-    my @argv = (%defaults, %$args, verbose => $verbose);
+    print $log "initializing pocketsphinx\n" if $log;
+    my @argv = (%defaults, %$args, -verbose => $verbose);
     {
 	my $i = 0;
 	foreach (@argv) {
@@ -83,10 +49,12 @@ sub init {
 	    }
 	}
     }
+    my %argv = @argv;
+    @argv = %argv;
     fbs_init(\@argv)
 	or return undef;
 
-    my $sps = $args->{-samp} || $defaults{-samp};
+    my $sps = $args->{-samprate} || $defaults{-samprate};
     my $self = { sock => $sock, log => $log,
 		 sps => $sps, sockflags => 0,
 		 timeout => 1000,
@@ -189,7 +157,7 @@ __END__
 
 =head1 NAME
 
-Speech::Recognizer::SPX::Server - Perl module for writing streaming audio speech recognition servers using Sphinx2
+Speech::Recognizer::SPX::Server - Perl module for writing streaming audio speech recognition servers using PocketSphinx
 
 =head1 SYNOPSIS
 
@@ -198,7 +166,7 @@ Speech::Recognizer::SPX::Server - Perl module for writing streaming audio speech
   my $audio_fh = new IO::File('speech.raw');
   my $srvr
       = Speech::Recognizer::SPX::Server->init({ -arg => val, ... }, $sock, $log, $verbose)
-        or die "couldn't initialize sphinx2: $!";
+        or die "couldn't initialize pocketsphinx: $!";
 
   my $client = new IO::Socket;
   while (accept $sock, $client) {
@@ -219,7 +187,7 @@ Speech::Recognizer::SPX::Server - Perl module for writing streaming audio speech
 =head1 DESCRIPTION
 
 This module encapsulates a bunch of the stuff needed to write a
-Sphinx2 server which takes streaming audio as input on an arbitrary
+PocketSphinx server which takes streaming audio as input on an arbitrary
 filehandle.  It's not meant to be flexible or transparent - if you
 want that, then read the code and write your own server program using
 just the Speech::Recognizer::SPX module.
@@ -227,11 +195,11 @@ just the Speech::Recognizer::SPX module.
 The interface is vaguely object-oriented, but unfortunately it is
 presently not possible to create multiple instances of
 Speech::Recognizer::SPX::Server within the same process, due to severe
-limitations of the underlying Sphinx-II library.  You can, however,
+limitations of the underlying PocketSphinx library.  You can, however,
 create multiple distinct servers with judicious use of C<fork>, as
 shown in the example above.
 
-It is possible that this will be fixed in a future release of Sphinx-II.
+It is possible that this will be fixed in a future release of PocketSphinx.
 
 =head1 METHODS
 
@@ -257,7 +225,7 @@ messages (boring things like "started listening at $foo") will not be
 printed.
 
 C<$verbose> determines the verbosity level of the Sphinx library.
-Currently, due to limitations in the Sphinx-II library, there are only
+Currently, due to limitations in the PocketSphinx library, there are only
 two options for this value, namely a true value for 'be insanely
 verbose', or a false value for 'say nothing at all'.
 
@@ -295,7 +263,7 @@ the user talking and not the hours and hours of silence in between.
 
 =item C<fini>
 
-Shuts down the Sphinx-II recognizer.  Doesn't close the socket or
+Shuts down the PocketSphinx recognizer.  Doesn't close the socket or
 anything though, you have to do that yourself.
 
 =back

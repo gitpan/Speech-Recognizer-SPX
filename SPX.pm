@@ -1,6 +1,6 @@
 use strict;
 
-# Speech::Recognizer::SPX:  Perl interface to the Sphinx-II speech recognizer.
+# Speech::Recognizer::SPX:  Perl interface to the PocketSphinx speech recognizer.
 
 # Copyright (c) 2000 Cepstral LLC.
 #
@@ -99,7 +99,7 @@ require Speech::Recognizer::SPX::Config;
 		      ],
 	       );
 
-$VERSION = 0.08_01;
+$VERSION = 0.09;
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -178,7 +178,7 @@ __END__
 
 =head1 NAME
 
-Speech::Recognizer::SPX - Perl extension for the Sphinx2 speech recognizer
+Speech::Recognizer::SPX - Perl extension for the PocketSphinx speech recognizer
 
 =head1 SYNOPSIS
 
@@ -190,21 +190,14 @@ Speech::Recognizer::SPX - Perl extension for the Sphinx2 speech recognizer
 
 =head1 DESCRIPTION
 
-This module provides a Perl interface to the Sphinx-II speech
+This module provides a Perl interface to the PocketSphinx speech
 recognizer library.
-
-Warning!  This interface is subject to change.  It's currently a bit
-clunky because of the way the Sphinx-II library is structured, and
-that will probably change (for the better, I hope) over time.
-
-When the interface changes, future versions of this documentation will
-point out how it has changed and how to deal with this.
 
 =head1 USING THIS MODULE
 
   use Speech::Recognizer::SPX qw(:fbs :uttproc :lm);
 
-Because most parts of the Sphinx-II library contain a lot of global
+Because most parts of the PocketSphinx library contain a lot of global
 internal state, it makes no sense to use an object-oriented interface
 at this time.  However I don't want to clobber your namespace with a
 billion functions you may or may not use.  To make things easier on
@@ -217,7 +210,7 @@ the functions they import are listed below.
 =item C<:fbs>
 
 This is somewhat of a misnomer - FBS stands for Fast Beam Search, but
-in actual fact this module (the fbs_main.c file in Sphinx-II) just
+in actual fact this module (the fbs_main.c file in PocketSphinx) just
 wraps around the other modules in sphinx (one of which actually does
 fast beam search :-) and initializes the recognizer for you.
 Functions imported by this tag are:
@@ -290,9 +283,7 @@ This will get better eventually.
 
 This function has a large number of options.  Someday they will be
 documented.  Until then, either look in the example code, or go
-straight to the source, namely the C<param> variable in
-C<src/libsphinx2/fbs_main.c> and the C<kb_param> variable in
-C<src/libsphinx2/kb_main.c>.
+straight to the source, namely the file C<include/cmdln_macro.h>.
 
 =head1 FEED ME
 

@@ -37,7 +37,7 @@ require DynaLoader;
 	      DEFAULT_START_FLAG
 	      DEFAULT_WINDOW_LENGTH
 	     );
-$VERSION=0.01;
+$VERSION=0.02;
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -85,7 +85,7 @@ Audio::MFCC - Perl module for computing mel-frequency cepstral coefficients
 
 =head1 DESCRIPTION
 
-This module provides an interface to the Sphinx-II feature extraction
+This module provides an interface to the Sphinx feature extraction
 library which can be used to extract mel-frequency cepstral
 coefficients from data.  These coefficients can then be passed to the
 C<Speech::Recognizer::SPX::uttproc_cepdata> function.
@@ -95,7 +95,7 @@ recognition on a different machine from the audio capture, and don't
 have the bandwidth to send a full stream of audio data over the
 network.
 
-Currently, Sphinx-II also uses delta and double-delta cepstral vectors
+Currently, Sphinx also uses delta and double-delta cepstral vectors
 as input to its vector quantization module, but the calculation of
 these values is done inside the recognizer's utterance processing
 module..  In the future it may be possible to move the extraction of

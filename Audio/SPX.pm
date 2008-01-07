@@ -1,6 +1,6 @@
 use strict;
 
-# Audio::SPX:  Perl interface to the Sphinx-II audio library.
+# Audio::SPX:  Perl interface to the Sphinx audio library.
 
 # Copyright (c) 2000 Cepstral LLC.
 #
@@ -27,7 +27,7 @@ require DynaLoader;
 	      DEFAULT_SAMPLES_PER_SEC
 	      );
 
-$VERSION=0.01_01;
+$VERSION=0.02;
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -62,7 +62,7 @@ __END__
 
 =head1 NAME
 
-Audio::SPX - Perl interface to the Sphinx-II audio library.
+Audio::SPX - Perl interface to the Sphinx audio library.
 
 =head1 SYNOPSIS
 
@@ -89,7 +89,7 @@ Audio::SPX - Perl interface to the Sphinx-II audio library.
 
   # If init_raw was used, this will consume the data in $buf, then
   # write back any non-slience data.  Yes, this feature is
-  # undocumented in the Sphinx-II headers.  Yes, it's very useful.
+  # undocumented in the Sphinx headers.  Yes, it's very useful.
   my $samples = $cad->read($buf, $max);
 
   $cad->reset;

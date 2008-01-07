@@ -1,5 +1,5 @@
 /*
- * Audio.xs: Perl interface to the Sphinx-II audio library
+ * Audio.xs: Perl interface to the Sphinx audio library
  *
  *
  * Copyright (c) 2000 Cepstral LLC.
@@ -16,9 +16,10 @@
 
 #include <unistd.h>
 
-#include <sphinx2/s2types.h>
-#include <sphinx2/ad.h>
-#include <sphinx2/cont_ad.h>
+#include <sphinx_config.h>
+#include <prim_type.h>
+#include <ad.h>
+#include <cont_ad.h>
 
 static int
 not_here(char *s)
@@ -189,10 +190,27 @@ not_there:
     return 0;
 }
 
-#ifdef AD_BACKEND_OSS
 int ad_nbfh_read(ad_rec_t *ad, int16 *buf, int32 max)
 {
-	int fd = ad->dspFD; /* Linux specific */
+#if defined(AD_BACKEND_OSS) || defined(AD_BACKEND_OSS_BSD) || defined(AD_BACKEND_ESD)
+	int fd = ad->dspFD;
+#elif defined(AD_BACKEND_SUNOS)
+	int fd = ad->audio_fd;
+#elif defined(AD_BACKEND_HPUX)
+	int fd = ad->streamSocket;
+#elif defined(AD_BACKEND_ALSA)
+	int fd = (int)(long)ad->dspH;
+#elif defined(AD_BACKEND_PORTAUDIO)
+	int fd = (int)(long)ad->astream;
+#elif defined(AD_BACKEND_IRIX)
+	int fd = (int)ad->audio;
+#elif defined(AD_BACKEND_OSF)
+	int fd = (int)(long)ad->aud;
+#elif defined(AD_BACKEND_WIN32)
+	int fd = (int)(long)ad->h_wavein;
+#else
+	int fd = -1;
+#endif
 	ssize_t bytes;
 	int16 *cur = buf;
 
@@ -220,7 +238,6 @@ int ad_nbfh_read(ad_rec_t *ad, int16 *buf, int32 max)
 
 	return bytes / ad->bps;
 }
-#endif
 
 typedef int32 SYSRET;
 
@@ -311,20 +328,31 @@ cont_ad_init_nbfh(class, fh, sps=16000)
 	PREINIT:
 		ad_rec_t *ad;
 	CODE:
-#ifdef AD_BACKEND_OSS
 		/* FIXME: memory leak here. */
 		Newz(99, ad, 1, ad_rec_t);
-
-		/* Linux/OSS specific, unfortunately */
-		ad->dspFD = fileno(fh);
 		ad->sps = sps;
 		/* FIXME: should not be hardcoded */
 		ad->bps = sizeof(int16);
-		RETVAL = cont_ad_init(ad, ad_nbfh_read);
+#if defined(AD_BACKEND_OSS) || defined(AD_BACKEND_OSS_BSD) || defined(AD_BACKEND_ESD)
+		ad->dspFD = fileno(fh);
+#elif defined(AD_BACKEND_SUNOS)
+		ad->audio_fd = fileno(fh);
+#elif defined(AD_BACKEND_HPUX)
+		ad->streamSocket = fileno(fh);
+#elif defined(AD_BACKEND_ALSA)
+		ad->dspH = (void *)fileno(fh);
+#elif defined(AD_BACKEND_PORTAUDIO)
+		ad->astream = (void *)fileno(fh);
+#elif defined(AD_BACKEND_IRIX)
+		ad->audio = (ALport)fileno(fh);
+#elif defined(AD_BACKEND_OSF)
+		ad->aud = (void *)fileno(fh);
+#elif defined(AD_BACKEND_WIN32)
+		ad->h_wavein = (HWAVEIN)fileno(fh);
 #else
-		croak("init_nbfh is not supported on this platform, due to Sphinx-II interface misdesign");
-		RETVAL = NULL;
+		croak("init_nbfh is not supported on this platform, due to Sphinx interface misdesign");
 #endif
+		RETVAL = cont_ad_init(ad, ad_nbfh_read);
 	OUTPUT:
 		RETVAL
 
@@ -338,7 +366,6 @@ cont_ad_init_raw(class, sps=16000)
 	PREINIT:
 		ad_rec_t foo;
 	CODE:
-		/* "Have you no TASTE?" - Linus Torvalds */
 		memset(&foo, 0, sizeof(foo));
 		foo.sps = sps; /* If it has no 'sps' field, you're really screwed. */
 		RETVAL = cont_ad_init(&foo, NULL);

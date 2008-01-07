@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# server-demo: demo of streaming audio to Sphinx-II over a socket.
+# server-demo: demo of streaming audio to PocketSphinx over a socket.
 
 # Copyright (c) 2000 Cepstral LLC.
 #

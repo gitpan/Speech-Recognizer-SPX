@@ -1,5 +1,5 @@
 /*
- * FE.xs: Perl interface to the Sphinx-II feature extraction library
+ * FE.xs: Perl interface to the Sphinx feature extraction library
  *
  * Copyright (c) 2000 Cepstral LLC.
  * This module is free software; you can redistribute it and/or modify
@@ -12,8 +12,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include <sphinx2/s2types.h>
-#include <sphinx2/fe.h>
+#include <prim_type.h>
+#include <fe.h>
 
 static int
 not_here(char *s)
@@ -333,27 +333,8 @@ fe_process_utt(fe, spch, nsamps)
 		float32 **cep;
 		int32 i, frame_count, output_frames;
 	PPCODE:
-		/* FIXME: there's no easy way to figure out how much memory
-		   fe_process_utt is going to require, or to set a bound on
-		   how much it will use, nor will the interface allocate the
-		   output for you.  This is (probably) correct, but it is
-		   tied to the internals of fe_process_utt() */
-
-		frame_count = (nsamps + fe->NUM_OVERFLOW_SAMPS /* how many samples */
-				 + fe->FRAME_SIZE - 1) /* round up to add some slack */
-			/ fe->FRAME_SHIFT; /* windowing, I presume ... */
-		New(666, cep, frame_count, float32 *);
-		for (i = 0; i < frame_count; ++i)
-			/* NUM_CEPSTRA is number of cepstral coefficients (I think) */
-			New(666+i, cep[i], fe->NUM_CEPSTRA, float32);
-
-		/* Cross our fingers... */
-#ifdef POST_0_6_FE
-		if (fe_process_utt(fe, spch, nsamps, cep, &output_frames) < 0)
+		if (fe_process_utt(fe, spch, nsamps, &cep, &output_frames) < 0)
 			goto out; /* empty list */
-#else
-		output_frames = fe_process_utt(fe, spch, nsamps, cep);
-#endif
 		assert(output_frames <= frame_count);
 		if (output_frames <= 0)
 			goto out; /* empty list */
@@ -376,9 +357,7 @@ fe_process_utt(fe, spch, nsamps)
 			PUSHs(sv_2mortal(newRV_noinc((SV *) vec)));
 		}
 	    out:
-		for (i = 0; i < frame_count; ++i)
-			Safefree(cep[i]);
-		Safefree(cep);
+		fe_free_2d(cep);
 
 
 SV *
@@ -389,12 +368,8 @@ fe_end_utt(fe)
 	float32 *cepv;
 	CODE:
 		New(0xc0debabe, cepv, fe->NUM_CEPSTRA, float32);
-#ifdef POST_0_6_FE
 		if (fe_end_utt(fe, cepv, &output_frames) < 0)
 			output_frames = -1;
-#else
-		output_frames = fe_end_utt(fe, cepv);
-#endif
 
 		if (output_frames > 0) { /* 1 is the only possible value */
 			SV ** svs;

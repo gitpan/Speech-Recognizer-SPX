@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# fe-test: demo of cepstral feature extraction using Sphinx-II
+# fe-test: demo of cepstral feature extraction using PocketSphinx
 
 # Copyright (c) 2000 Cepstral LLC.
 #

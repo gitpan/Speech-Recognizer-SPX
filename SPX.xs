@@ -1,5 +1,5 @@
 /*
- * SPX.xs:  Perl interface to the Sphinx-II speech recognizer.
+ * SPX.xs:  Perl interface to the PocketSphinx speech recognizer.
  *
  * Copyright (c) 2000 Cepstral LLC.
  *
@@ -17,21 +17,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-#include <sphinx2/s2types.h>
-#include <sphinx2/CM_macros.h>
-#include <sphinx2/list.h>
-#include <sphinx2/hash.h>
-#include <sphinx2/err.h>
-#include <sphinx2/dict.h>
-#include <sphinx2/log.h>
-#include <sphinx2/log_add.h>
-#include <sphinx2/lmclass.h>
-#include <sphinx2/lm_3g.h>
-#include <sphinx2/mulaw.h>
-#include <sphinx2/sphinxp.h>
-#include <sphinx2/s2params.h>
-#include <sphinx2/cdcn.h>
-#include <sphinx2/fbs.h>
+#include <fbs.h>
 
 static int
 not_here(char *s)
@@ -288,17 +274,9 @@ new_seg_sv(search_hyp_t *hyp)
 	av_push(seg_av, newSViv(hyp->ef));
 	av_push(seg_av, newSViv(hyp->ascr));
 	av_push(seg_av, newSViv(hyp->lscr));
-#ifdef POST_0_6_API
-	av_push(seg_av, newSViv(hyp->fsg_state_to));
-#else
 	av_push(seg_av, newSViv(hyp->fsg_state));
-#endif
 	av_push(seg_av, newSVnv(hyp->conf));
 	av_push(seg_av, newSViv(hyp->latden));
-	av_push(seg_av, newSVnv(hyp->phone_perp));
-#ifdef POST_0_6_API
-	av_push(seg_av, newSViv(hyp->fsg_state_from));
-#endif
 
 	return sv_bless(newRV_noinc((SV *)seg_av),
 			gv_stashpv("Speech::Recognizer::SPX::Segment", 1));
@@ -407,10 +385,6 @@ fbs_init(argv_ref=&PL_sv_undef)
 
 SYSRET
 fbs_end()
-
-SYSRET
-uttfile_open(file)
-	char const *		file
 
 SYSRET
 uttproc_begin_utt(...)
@@ -613,7 +587,7 @@ search_get_alt(n, sf=0, ef=searchFrame(), w1=NULL, w2="<s>")
 		if (w1 != NULL)
 			w1_wid = kb_get_word_id(w1);
 		else
-			w1_wid = NO_WORD;
+			w1_wid = -1;
 		if (w2 != NULL)
 			w2_wid = kb_get_word_id(w2);
 		else

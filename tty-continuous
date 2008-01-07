@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
-# tty-continuous: Perl equivalent of the 'sphinx2-continuous'
-# program included with Sphinx-II
+# tty-continuous: Perl equivalent of the 'pocketsphinx_continuous'
+# program included with PocketSphinx
 
 # Copyright (c) 2000 Cepstral LLC.
 #

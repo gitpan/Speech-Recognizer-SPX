@@ -1,80 +1,34 @@
 use ExtUtils::MakeMaker;
 use Getopt::Long;
 use strict;
-use vars qw($SPX_PREFIX $SPX_DIR);
 
-GetOptions('sphinx-prefix=s' => \$SPX_PREFIX);
+use vars qw($PKG_LIBS $PKG_CFLAGS $PKG_PREFIX);
 
-my @possible_prefixes;
-if (defined $SPX_PREFIX) {
-    @possible_prefixes = ($SPX_PREFIX);
-} else {
-    @possible_prefixes = $ENV{HOME}, qw(
-			    /usr
-			    /usr/local
-			    /usr0
-			    /usr0/sphinx
-			    /opt/sphinx
-			    /opt/sphinx2
-			   );
-}
-
-undef $SPX_PREFIX;
-foreach my $dir (@possible_prefixes) {
-    if (-d "$dir/lib"
-	and -d "$dir/share/sphinx2/model/hmm"
-	and -d "$dir/share/sphinx2/model/lm") {
-	$SPX_PREFIX = $dir;
-	$SPX_DIR = "$dir/share/sphinx2";
-	last;
-    }
-}
-
-unless (defined($SPX_DIR)) {
-    local $" = "\n";
-    print <<"EOF";
-No Sphinx2 installation could be found in any of the following
-directories:
-
-@possible_prefixes
-
-Please specify the --prefix option used to configure Sphinx2 on the
-command-line for 'perl Makefile.PL" like this:
-
-\$ perl Makefile.PL --sphinx-prefix=/path/where/you/installed/it
-
-If you are unsure where this is, ask your system administrator,
-or whoever installed Sphinx2 on your system.
+chomp($PKG_CFLAGS = `pkg-config --cflags pocketsphinx`);
+if ($?) {
+    die <<EOF;
+Unable to locate PocketSphinx using pkg-config.  Please make sure that
+you have installed pkg-config and PocketSphinx on your system, and
+that PKG_CONFIG_PATH is set correctly.
 EOF
-    exit 1;
 }
+chomp($PKG_LIBS = `pkg-config --libs pocketsphinx sphinxbase`);
+chomp($PKG_PREFIX = `pkg-config --variable=prefix pocketsphinx`);
 
-print "Found Sphinx-II in $SPX_PREFIX and $SPX_DIR\n";
 unlink './SPX/Config.pm';
 open CONFIG, ">./SPX/Config.pm"
     or die "can't open ./SPX/Config.pm: $!";
 print CONFIG <<EOF;
 package Speech::Recognizer::SPX;
-\$PREFIX = '$SPX_PREFIX';
-\$SPHINXDIR = '$SPX_DIR';
+\$PREFIX = '$PKG_PREFIX';
+\$SPHINXDIR = '$PKG_PREFIX/share/pocketsphinx';
 1;
 EOF
 close CONFIG;
 
-
-my @defs;
-if (open FE_H, "<$SPX_PREFIX/include/sphinx2/fe.h") {
-    while (<FE_H>) {
-	if (/\*nframes/) {
-	    print "Detected post-0.6 hypothesis API\n";
-	    push @defs, '-DPOST_0_6_API';
-	    last;
-	}
-    }
-}
-else {
-    warn "Failed to open $SPX_PREFIX/include/sphinx2/fe.h, compilation may fail\n";
-}
+# This is necessary for PocketSphinx.  We'll add back support for
+# Sphinx-II later.
+my @defs = ('-DPOST_0_6_API');
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -82,10 +36,10 @@ WriteMakefile(
 	      NAME	   => 'Speech::Recognizer::SPX',
 	      VERSION_FROM => 'SPX.pm',
 	      DIR          => [ 'FE', 'Audio' ],
-	      LIBS	   => ["-L$SPX_PREFIX/lib -lsphinx2 -lsphinx2ad -lsphinx2fe -lm"],
-	      INC          => "-I$SPX_PREFIX/include",
-	      OPTIMIZE     => '-g -O2',
+	      LIBS	   => [$PKG_LIBS],
+	      INC          => $PKG_CFLAGS,
 	      DEFINE       => "@defs",
+	      OPTIMIZE     => '-g -O2',
 	      # For Speech::Recognizer::SPX::Server
 	      PREREQ_PM    => { 'Time::HiRes' => 0 },
 	      clean        => { FILES => 'SPX/Config.pm' },

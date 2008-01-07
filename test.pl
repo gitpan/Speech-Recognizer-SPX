@@ -20,44 +20,11 @@ print "ok 1\n";
 # (correspondingly "not ok 13") depending on the success of chunk 13
 # of the test code):
 
-fbs_init({-live		=> 'TRUE',
-	  -samp		=> 16000,
+fbs_init({ -samprate	=> 16000,
 	  -adcin	=> 'TRUE',
-	  -ctloffset	=> 0,
-	  -ctlcount	=> 100000000,
-	  -cepdir	=> "$SPHINXDIR/model/lm/turtle",
-	  -datadir	=> "$SPHINXDIR/model/lm/turtle",
-	  -agcmax	=> 'FALSE',
-	  -langwt	=> 6.5,
-	  -fwdflatlw	=> 8.5,
-	  -rescorelw	=> 9.5,
-	  -ugwt		=> 0.5,
-	  -fillpen	=> 1e-10,
-	  -silpen	=> 0.005,
-	  -inspen	=> 0.65,
-	  -top		=> 1,
-	  -topsenfrm	=> 3,
-	  -topsenthresh	=> -70000,
-	  -beam		=> 2e-06,
-	  -npbeam	=> 2e-06,
-	  -lpbeam	=> 2e-05,
-	  -lponlybeam	=> 0.0005,
-	  -nwbeam	=> 0.0005,
-	  -fwdflat	=> 'FALSE',
-	  -fwdflatbeam	=> 1e-08,
-	  -fwdflatnwbeam=> 0.0003,
-	  -bestpath	=> 'TRUE',
-	  -kbdumpdir	=> $SPHINXDIR,
-	  -lmfn		=> "$SPHINXDIR/model/lm/turtle/turtle.lm",
-	  -dictfn	=> "$SPHINXDIR/model/lm/turtle/turtle.dic",
-	  -phnfn	=> "$SPHINXDIR/model/hmm/6k/phone",
-	  -mapfn	=> "$SPHINXDIR/model/hmm/6k/map",
-	  -hmmdir	=> "$SPHINXDIR/model/hmm/6k",
-	  -hmmdirlist	=> "$SPHINXDIR/model/hmm/6k",
-	  -ndictfn	=> "$SPHINXDIR/model/hmm/6k/noisedict",
-	  '-8bsen'	=> 'TRUE',
-	  -sendumpfn	=> "$SPHINXDIR/model/hmm/6k/sendump",
-	  -cbdir	=> "$SPHINXDIR/model/hmm/6k"});
+	  -lm		=> "$SPHINXDIR/model/lm/turtle/turtle.lm",
+	  -dict 	=> "$SPHINXDIR/model/lm/turtle/turtle.dic",
+	  -hmm  	=> "$SPHINXDIR/model/hmm/wsj1" });
 
 
 sub BIG_ENDIAN () { $Config{byteorder} eq '4321' }
